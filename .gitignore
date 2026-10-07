@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+.DS_Store
+tests/fixtures/*.png
+tests/fixtures/*.webp
+tests/fixtures/*.jpg
