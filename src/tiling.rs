@@ -69,21 +69,47 @@ impl Tiler {
         tile: &RgbaImage,
         dest_x: u32,
         dest_y: u32,
-        _overlap_scaled: u32,
+        overlap_scaled: u32,
     ) {
         let (tile_w, tile_h) = tile.dimensions();
         let (dest_w, dest_h) = dest.dimensions();
 
         for ty in 0..tile_h {
             let dy = dest_y + ty;
-            if dy >= dest_h { break; }
+            if dy >= dest_h {
+                break;
+            }
+            let weight_y = if dest_y > 0 && overlap_scaled > 0 && ty < overlap_scaled {
+                (ty as f32 + 1.0) / (overlap_scaled as f32 + 1.0)
+            } else {
+                1.0
+            };
+
             for tx in 0..tile_w {
                 let dx = dest_x + tx;
-                if dx >= dest_w { break; }
+                if dx >= dest_w {
+                    break;
+                }
+                let weight_x = if dest_x > 0 && overlap_scaled > 0 && tx < overlap_scaled {
+                    (tx as f32 + 1.0) / (overlap_scaled as f32 + 1.0)
+                } else {
+                    1.0
+                };
 
                 let pixel = tile.get_pixel(tx, ty);
-                // Simple alpha blending or direct placement if border not overlapping
-                dest.put_pixel(dx, dy, *pixel);
+                let w = weight_x * weight_y;
+                if w < 1.0 {
+                    let bg = dest.get_pixel(dx, dy);
+                    let blended = image::Rgba([
+                        (bg[0] as f32 * (1.0 - w) + pixel[0] as f32 * w).round() as u8,
+                        (bg[1] as f32 * (1.0 - w) + pixel[1] as f32 * w).round() as u8,
+                        (bg[2] as f32 * (1.0 - w) + pixel[2] as f32 * w).round() as u8,
+                        (bg[3] as f32 * (1.0 - w) + pixel[3] as f32 * w).round() as u8,
+                    ]);
+                    dest.put_pixel(dx, dy, blended);
+                } else {
+                    dest.put_pixel(dx, dy, *pixel);
+                }
             }
         }
     }

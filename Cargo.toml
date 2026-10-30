@@ -5,7 +5,10 @@ edition = "2021"
 authors = ["Brandon Hubbard"]
 license = "MIT"
 description = "High-performance native Rust port and CLI/library for Upscayl: AI image super-resolution, batch processing, and neural upscaling."
+homepage = "https://code.brandonhubbard.com/upscayl-rs/"
+documentation = "https://code.brandonhubbard.com/upscayl-rs/"
 repository = "https://github.com/bhubbard/upscayl-rs"
+readme = "README.md"
 keywords = ["upscayl", "super-resolution", "image-upscaling", "ncnn", "ai-enhancement"]
 categories = ["command-line-utilities", "multimedia::images"]
 

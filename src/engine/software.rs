@@ -29,7 +29,7 @@ pub fn upscale_software(
 }
 
 /// Applies an adaptive unsharp mask filter to enhance edge sharpness and texture micro-contrast
-fn enhance_details(img: &RgbaImage, amount: f32, radius: f32) -> RgbaImage {
+pub fn enhance_details(img: &RgbaImage, amount: f32, radius: f32) -> RgbaImage {
     let (w, h) = img.dimensions();
     let mut out = ImageBuffer::new(w, h);
 

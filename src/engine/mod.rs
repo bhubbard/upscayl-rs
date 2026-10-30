@@ -51,12 +51,8 @@ impl UpscaylEngine {
             None
         };
 
-        let mut engine_used = "pure-rust-lanczos3".to_string();
-
-        if let Some(bin_path) = native_bin {
+        let engine_used = if let Some(bin_path) = native_bin {
             // Native NCNN Vulkan execution
-            engine_used = "ncnn-vulkan".to_string();
-
             if options.double_upscale {
                 // Pass 1: Intermediate 4x upscale to tempfile
                 let temp_dir = tempfile::tempdir()?;
@@ -74,6 +70,7 @@ impl UpscaylEngine {
             } else {
                 native::NativeNcnn::execute(&bin_path, input, output, options, progress_callback)?;
             }
+            "ncnn-vulkan".to_string()
         } else {
             // Pure Rust high-precision image resampling engine
             if let Some(cb) = progress_callback { cb(10.0); }
@@ -100,20 +97,21 @@ impl UpscaylEngine {
             // Save in requested format
             let dyn_output = DynamicImage::ImageRgba8(processed);
             let is_jpeg = options.format == crate::config::ImageFormat::Jpeg
-                || output.extension().and_then(|e| e.to_str()).map_or(false, |e| {
+                || output.extension().and_then(|e| e.to_str()).is_some_and(|e| {
                     e.eq_ignore_ascii_case("jpg") || e.eq_ignore_ascii_case("jpeg")
                 });
 
             if is_jpeg {
                 dyn_output.to_rgb8().save(output)
-                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+                    .map_err(std::io::Error::other)?;
             } else {
                 dyn_output.save(output)
-                    .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+                    .map_err(std::io::Error::other)?;
             }
 
             if let Some(cb) = progress_callback { cb(100.0); }
-        }
+            "pure-rust-lanczos3".to_string()
+        };
 
         // Read final upscaled dimensions
         let final_reader = ImageReader::open(output)?

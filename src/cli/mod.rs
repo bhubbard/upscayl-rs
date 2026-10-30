@@ -65,7 +65,7 @@ pub enum Commands {
         double: bool,
 
         /// Path to custom models directory
-        #[arg(short = 'm', long)]
+        #[arg(short = 'p', long)]
         models_path: Option<PathBuf>,
 
         /// Force pure-Rust Lanczos3 software engine (bypasses NCNN Vulkan)
